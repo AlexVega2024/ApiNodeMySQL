@@ -10,7 +10,17 @@ const GetListCategoriesController = async (req, res) => {
   }
 };
 
-const GetNoticiesByCategoryController = async (req, res) => {
+const GetListNoticiesController = async (req, res) => {
+  try {
+    const response = await noticiesModel.ListNoticies();
+    res.json(response);
+  } catch (error) {
+    console.log(error);
+    res.json(error);
+  }
+};
+
+const GetListNoticiesByCategoryController = async (req, res) => {
   try {
     const { id_category } = req.body;
     const response = await noticiesModel.ListNoticiesByCategory(id_category);
@@ -21,10 +31,83 @@ const GetNoticiesByCategoryController = async (req, res) => {
   }
 };
 
+const GetListFirstThreeNoticiesController = async (req, res) => {
+  try {
+    const { id_category, id_noticie } = req.body;
+    const response = await noticiesModel.ListFirstThreeNoticies(id_category, id_noticie);
+    res.json(response);
+  } catch (error) {
+    console.log("Error en la consulta a la BD: " + error);
+  }
+};
+
+const GetNoticieByCategoryController = async (req, res) => {
+  try {
+    const { id_category, id_noticie } = req.body;
+    const response = await noticiesModel.GetNoticieByCategory(
+      id_category,
+      id_noticie
+    );
+    res.json(response[0]);
+  } catch (error) {
+    console.log(error);
+    res.json(error);
+  }
+};
+
+const GetGalleryByNoticieAndCategoryController = async (req, res) => {
+  try {
+    const { id_noticie, id_category } = req.body;
+    const response = await noticiesModel.GetGalleryByNoticeAndCategory(
+      id_noticie,
+      id_category
+    );
+    res.json(response);
+  } catch (error) {
+    console.log(error);
+    res.json(error);
+  }
+};
+
+const RegisterCategoryController = async (req, res) => {
+  try {
+    const { name, state_categ } = req.body;
+    const response = await noticiesModel.RegisterCategory(name, state_categ);
+    res.json(response);
+  } catch (error) {}
+};
+
+const RegisterNoticeByCategoryController = async (req, res) => {
+  try {
+    const {
+      id_category,
+      img_banner,
+      img_card,
+      title,
+      state_notice,
+      date_time,
+      description,
+    } = req.body;
+    const response = await noticiesModel.RegisterNoticeByCategory(
+      id_category,
+      img_banner,
+      img_card,
+      title,
+      state_notice,
+      date_time,
+      description
+    );
+    res.json(response);
+  } catch (error) {}
+};
+
 const ActiveInactiveCategoryStateController = async (req, res) => {
   try {
-    const { new_state, id_category } = req.body;
-    const response = await noticiesModel.ActiveInactiveStateCategory(new_state, id_category);
+    const { state_categ, id_category } = req.body;
+    const response = await noticiesModel.ActiveInactiveStateCategory(
+      state_categ,
+      id_category
+    );
     res.json(response);
   } catch (error) {
     console.log(error);
@@ -33,8 +116,12 @@ const ActiveInactiveCategoryStateController = async (req, res) => {
 
 const ActiveInactiveNoticeStateController = async (req, res) => {
   try {
-    const { id_notice, id_category, new_state } = req.body;
-    const response = await noticiesModel.ActiveInactiveStateNoticie(id_notice, id_category, new_state);
+    const { state_notice, id_category, id_notice } = req.body;
+    const response = await noticiesModel.ActiveInactiveStateNoticie(
+      state_notice,
+      id_category,
+      id_notice
+    );
     res.json(response);
   } catch (error) {
     console.log(error);
@@ -42,7 +129,13 @@ const ActiveInactiveNoticeStateController = async (req, res) => {
 };
 export const noticiesController = {
   GetListCategoriesController,
-  GetNoticiesByCategoryController,
+  GetListNoticiesController,
+  GetListNoticiesByCategoryController,
+  GetListFirstThreeNoticiesController,
+  GetNoticieByCategoryController,
+  GetGalleryByNoticieAndCategoryController,
+  RegisterCategoryController,
+  RegisterNoticeByCategoryController,
   ActiveInactiveCategoryStateController,
-  ActiveInactiveNoticeStateController
+  ActiveInactiveNoticeStateController,
 };
