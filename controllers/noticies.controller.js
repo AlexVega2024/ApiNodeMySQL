@@ -1,13 +1,28 @@
 import { noticiesModel } from "../models/noticies.model.js";
-import fs from "fs";
 
 const GetListCategoriesController = async (req, res) => {
   try {
     const response = await noticiesModel.ListCategories();
     res.json(response);
   } catch (error) {
-    console.log(error);
-    res.json(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
+  }
+};
+
+const GetListCategoriesActiveController = async (req, res) => {
+  try {
+    const response = await noticiesModel.ListCategoriesActive();
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
@@ -16,19 +31,25 @@ const GetListNoticiesController = async (req, res) => {
     const response = await noticiesModel.ListNoticies();
     res.json(response);
   } catch (error) {
-    console.log(error);
-    res.json(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
-const GetListNoticiesByCategoryController = async (req, res) => {
+const GetListNoticiesByCategoryActiveController = async (req, res) => {
   try {
     const { id_category } = req.body;
-    const response = await noticiesModel.ListNoticiesByCategory(id_category);
+    const response = await noticiesModel.ListNoticiesByCategoryActive(id_category);
     res.json(response);
   } catch (error) {
-    console.log(error);
-    res.json(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
@@ -41,7 +62,11 @@ const GetListFirstThreeNoticiesController = async (req, res) => {
     );
     res.json(response);
   } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
@@ -54,22 +79,38 @@ const GetNoticieByCategoryController = async (req, res) => {
     );
     res.json(response[0]);
   } catch (error) {
-    console.log(error);
-    res.json(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
-const GetGalleryByNoticieAndCategoryController = async (req, res) => {
+const GetListGalleryController = async (req, res) => {
   try {
-    const { id_noticie, id_category } = req.body;
-    const response = await noticiesModel.GetGalleryByNoticeAndCategory(
-      id_noticie,
-      id_category
-    );
+    const response = await noticiesModel.ListGallery();
     res.json(response);
   } catch (error) {
-    console.log(error);
-    res.json(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
+  }
+};
+
+const GetGalleryByNoticeController = async (req, res) => {
+  try {
+    const { id_notice } = req.body;
+    const response = await noticiesModel.GetGalleryNotice(id_notice);
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
@@ -77,8 +118,18 @@ const RegisterCategoryController = async (req, res) => {
   try {
     const { name } = req.body;
     const response = await noticiesModel.RegisterCategory(name);
-    res.json(response);
-  } catch (error) {}
+    res.status(200).json({
+      success: true,
+      data: response,
+      message: "Se registro correctamente la categoría.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
+  }
 };
 
 const RegisterNoticeByCategoryController = async (req, res) => {
@@ -87,16 +138,15 @@ const RegisterNoticeByCategoryController = async (req, res) => {
         id_category,
         title,
         state_notice,
-        date_time,
         description,
       } = req.body;
       
     // Obtener las rutas de los archivos subidos
     const img_card_path = req.files["img_card"]
-      ? req.files["img_card"][0].originalname
+      ? req.files["img_card"][0].filename
       : "";
     const img_banner_path = req.files["img_banner"]
-      ? req.files["img_banner"][0].originalname
+      ? req.files["img_banner"][0].filename
       : "";
     await noticiesModel.RegisterNoticeByCategory(
       id_category,
@@ -104,12 +154,38 @@ const RegisterNoticeByCategoryController = async (req, res) => {
       img_banner_path,
       title,
       state_notice,
-      date_time,
       description
     );
     res.json({ status: "success" });
   } catch (error) {
-    console.log("Error en el controlador: ", error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
+  }
+};
+
+const RegisterGalleryController = async (req, res) => {
+  try {
+    const {
+        id_notice
+      } = req.body;
+      
+      console.log("imagen: ", req.file["filename"]);
+    // Obtener las rutas de los archivos subidos
+    const img_gallery_path = req.file["filename"];
+    await noticiesModel.RegisterGallery(
+      id_notice,
+      img_gallery_path
+    );
+    res.json({ status: "success" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
@@ -122,7 +198,11 @@ const ActiveInactiveCategoryStateController = async (req, res) => {
     );
     res.json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
@@ -136,7 +216,28 @@ const ActiveInactiveNoticeStateController = async (req, res) => {
     );
     res.json(response);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
+  }
+};
+
+const ActiveInactiveGalleryStateController = async (req, res) => {
+  try {
+    const { state_image, id_notice } = req.body;
+    const response = await noticiesModel.ActiveInactiveStateGallery(
+      state_image,
+      id_notice
+    );
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
@@ -150,7 +251,41 @@ const UpdateCategoryController = async (req, res) => {
       res.json(response);
     }
   } catch (error) {
-    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
+  }
+};
+
+const UpdateNoticiesController = async (req, res) => {
+  try {
+    const { title, description, id_category, id_notice } =
+      req.body;
+
+      const img_card_path = req.files["img_card"]
+      ? req.files["img_card"][0].filename
+      : "";
+    const img_banner_path = req.files["img_banner"]
+      ? req.files["img_banner"][0].filename
+      : "";
+      console.log(req.files["img_card"]);
+    const response = await noticiesModel.UpdateNoticies(
+      img_banner_path,
+      img_card_path,
+      title,
+      description,
+      id_category,
+      id_notice
+    );
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
@@ -165,7 +300,11 @@ const DeleteCategoryController = async (req, res) => {
       res.json(response);
     }
   } catch (error) {
-    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
@@ -179,23 +318,32 @@ const DeleteNoticeController = async (req, res) => {
       res.json(response);
     }
   } catch (error) {
-    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Error en la base de datos",
+      error: error.message,
+    });
   }
 };
 
 
 export const noticiesController = {
   GetListCategoriesController,
+  GetListCategoriesActiveController,
   GetListNoticiesController,
-  GetListNoticiesByCategoryController,
+  GetListNoticiesByCategoryActiveController,
   GetListFirstThreeNoticiesController,
   GetNoticieByCategoryController,
-  GetGalleryByNoticieAndCategoryController,
+  GetListGalleryController,
+  GetGalleryByNoticeController,
   RegisterCategoryController,
   RegisterNoticeByCategoryController,
+  RegisterGalleryController,
   ActiveInactiveCategoryStateController,
   ActiveInactiveNoticeStateController,
+  ActiveInactiveGalleryStateController,
   UpdateCategoryController,
+  UpdateNoticiesController,
   DeleteCategoryController,
   DeleteNoticeController
 };

@@ -30,18 +30,23 @@ const upload = multer({ storage: storage });
 const router = Router();
 // METHODS GET
 router.get("/get-categories", noticiesController.GetListCategoriesController);
+router.get("/list-categories-active", noticiesController.GetListCategoriesActiveController);
 router.get("/get-noticies", noticiesController.GetListNoticiesController);
+router.get("/get-galleries", noticiesController.GetListGalleryController);
 
 // METHODS POST
-router.post("/list-noticies", noticiesController.GetListNoticiesByCategoryController);
+router.post("/list-noticies-active", noticiesController.GetListNoticiesByCategoryActiveController);
 router.post("/list-first-noticies", noticiesController.GetListFirstThreeNoticiesController);
 router.post("/get-noticie", noticiesController.GetNoticieByCategoryController);
-router.post("/get-gallery-notice", noticiesController.GetGalleryByNoticieAndCategoryController);
+router.post("/get-gallery-notice", noticiesController.GetGalleryByNoticeController);
 router.post("/register-category", noticiesController.RegisterCategoryController);
 router.post("/register-notice", upload.fields([{ name: 'img_card' }, { name: 'img_banner' }]), noticiesController.RegisterNoticeByCategoryController);
+router.post("/register-gallery", upload.single('name_image'), noticiesController.RegisterGalleryController);
 router.post("/state-category", noticiesController.ActiveInactiveCategoryStateController);
 router.post("/state-noticie", noticiesController.ActiveInactiveNoticeStateController);
+router.post("/state-gallery", noticiesController.ActiveInactiveGalleryStateController);
 router.post("/update-category", noticiesController.UpdateCategoryController);
+router.post("/update-noticie", upload.fields([{ name: 'img_card' }, { name: 'img_banner' }]), noticiesController.UpdateNoticiesController);
 router.post("/delete-category", noticiesController.DeleteCategoryController);
 router.post("/delete-noticie", noticiesController.DeleteNoticeController);
 
