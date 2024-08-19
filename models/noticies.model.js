@@ -12,7 +12,8 @@ const ListCategories = async () => {
 
 const ListNoticies = async () => {
   try {
-    const query = "SELECT n.* FROM noticies n INNER JOIN categories c on n.id_category=c.id_category";
+    const query =
+      `SELECT n.* FROM noticies n INNER JOIN categories c on n.id_category=c.id_category`;
     const data = await pool.query(query);
     return data[0];
   } catch (error) {
@@ -22,7 +23,8 @@ const ListNoticies = async () => {
 
 const ListNoticiesByCategory = async (id_category) => {
   try {
-    const query = "SELECT * FROM noticies n INNER JOIN categories c on n.id_category=c.id_category where c.id_category=?";
+    const query =
+      "SELECT * FROM noticies n INNER JOIN categories c on n.id_category=c.id_category where c.id_category=?";
     const data = await pool.query(query, [id_category]);
     return data[0];
   } catch (error) {
@@ -60,35 +62,47 @@ const GetGalleryByNoticeAndCategory = async (id_noticie, id_category) => {
     const query = `SELECT gi.id_gallery, gi.name_image, gi.state_image, gi.id_notice FROM gallery_images gi 
                     INNER JOIN noticies n ON gi.id_notice=n.id_notice
                     INNER JOIN categories c ON n.id_category = c.id_category
-                    WHERE n.id_notice=? && c.id_category=?`
+                    WHERE n.id_notice=? && c.id_category=?`;
     const data = await pool.query(query, [id_noticie, id_category]);
     return data[0];
-  } catch (error) {
-    
-  }
-}
+  } catch (error) {}
+};
 
-const RegisterCategory = async (name, state_categ) => {
+const RegisterCategory = async (name) => {
   try {
     const query = `INSERT INTO categories (name, state_categ) 
-                    VALUES (?, ?)`
-    const data = await pool.query(query, [name, state_categ]);
+                    VALUES (?, 1)`;
+    const data = await pool.query(query, [name]);
     return data[0];
-  } catch (error) {
-    
-  }
-}
+  } catch (error) {}
+};
 
-const RegisterNoticeByCategory = async (id_category, img_banner,img_card, title, state_notice, date_time, description) => {
+const RegisterNoticeByCategory = async (
+  id_category,
+  img_banner,
+  img_card,
+  title,
+  state_notice,
+  date_time,
+  description
+) => {
   try {
     const query = `INSERT INTO noticies (id_category,img_banner,img_card, title, state_notice, date_time, description) 
-                  VALUES (?, ?, ?, ?, ?, ?, ?)`
-    const data = await pool.query(query, [id_category, img_banner,img_card, title, state_notice, date_time, description]);
+                  VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    const data = await pool.query(query, [
+      id_category,
+      img_banner,
+      img_card,
+      title,
+      state_notice,
+      date_time,
+      description,
+    ]);
     return data[0];
   } catch (error) {
-    
+    console.log("Error en el modelo: ", error);
   }
-}
+};
 
 const ActiveInactiveStateCategory = async (state_categ, id_category) => {
   try {
@@ -100,10 +114,50 @@ const ActiveInactiveStateCategory = async (state_categ, id_category) => {
   }
 };
 
-const ActiveInactiveStateNoticie = async (state_notice, id_category, id_notice) => {
+const ActiveInactiveStateNoticie = async (
+  state_notice,
+  id_category,
+  id_notice
+) => {
   try {
-    const query = "UPDATE categories c INNER JOIN noticies n on c.id_category = n.id_category SET n.state_notice=? WHERE c.id_category = ? && n.id_notice = ?";
-    const data = await pool.query(query, [state_notice, id_category, id_notice]);
+    const query =
+      `UPDATE categories c INNER JOIN noticies n on c.id_category = n.id_category 
+      SET n.state_notice=? WHERE c.id_category = ? && n.id_notice = ?`;
+    const data = await pool.query(query, [
+      state_notice,
+      id_category,
+      id_notice,
+    ]);
+    return data[0];
+  } catch (error) {
+    console.log("Error en la consulta a la BD: " + error);
+  }
+};
+
+const UpdateCategory = async (name, id_category) => {
+  try {
+    const query = "UPDATE categories SET name=? WHERE id_category=?";
+    const data = await pool.query(query, [name, id_category]);
+    return data[0];
+  } catch (error) {
+    console.log("Error en la consulta a la BD: " + error);
+  }
+};
+
+const DeleteCategory = async (id_category) => {
+  try {
+    const query = "DELETE FROM categories WHERE id_category=?";
+    const data = await pool.query(query, [id_category]);
+    return data[0];
+  } catch (error) {
+    console.log("Error en la consulta a la BD: " + error);
+  }
+};
+
+const DeleteNotice = async (id_notice) => {
+  try {
+    const query = "DELETE FROM noticies WHERE id_notice=?";
+    const data = await pool.query(query, [id_notice]);
     return data[0];
   } catch (error) {
     console.log("Error en la consulta a la BD: " + error);
@@ -120,5 +174,8 @@ export const noticiesModel = {
   RegisterCategory,
   RegisterNoticeByCategory,
   ActiveInactiveStateCategory,
-  ActiveInactiveStateNoticie
+  ActiveInactiveStateNoticie,
+  UpdateCategory,
+  DeleteCategory,
+  DeleteNotice
 };

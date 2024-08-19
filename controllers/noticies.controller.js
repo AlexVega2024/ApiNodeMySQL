@@ -1,4 +1,5 @@
 import { noticiesModel } from "../models/noticies.model.js";
+import fs from "fs";
 
 const GetListCategoriesController = async (req, res) => {
   try {
@@ -34,7 +35,10 @@ const GetListNoticiesByCategoryController = async (req, res) => {
 const GetListFirstThreeNoticiesController = async (req, res) => {
   try {
     const { id_category, id_noticie } = req.body;
-    const response = await noticiesModel.ListFirstThreeNoticies(id_category, id_noticie);
+    const response = await noticiesModel.ListFirstThreeNoticies(
+      id_category,
+      id_noticie
+    );
     res.json(response);
   } catch (error) {
     console.log("Error en la consulta a la BD: " + error);
@@ -71,8 +75,8 @@ const GetGalleryByNoticieAndCategoryController = async (req, res) => {
 
 const RegisterCategoryController = async (req, res) => {
   try {
-    const { name, state_categ } = req.body;
-    const response = await noticiesModel.RegisterCategory(name, state_categ);
+    const { name } = req.body;
+    const response = await noticiesModel.RegisterCategory(name);
     res.json(response);
   } catch (error) {}
 };
@@ -80,25 +84,33 @@ const RegisterCategoryController = async (req, res) => {
 const RegisterNoticeByCategoryController = async (req, res) => {
   try {
     const {
+        id_category,
+        title,
+        state_notice,
+        date_time,
+        description,
+      } = req.body;
+      
+    // Obtener las rutas de los archivos subidos
+    const img_card_path = req.files["img_card"]
+      ? req.files["img_card"][0].originalname
+      : "";
+    const img_banner_path = req.files["img_banner"]
+      ? req.files["img_banner"][0].originalname
+      : "";
+    await noticiesModel.RegisterNoticeByCategory(
       id_category,
-      img_banner,
-      img_card,
-      title,
-      state_notice,
-      date_time,
-      description,
-    } = req.body;
-    const response = await noticiesModel.RegisterNoticeByCategory(
-      id_category,
-      img_banner,
-      img_card,
+      img_card_path,
+      img_banner_path,
       title,
       state_notice,
       date_time,
       description
     );
-    res.json(response);
-  } catch (error) {}
+    res.json({ status: "success" });
+  } catch (error) {
+    console.log("Error en el controlador: ", error);
+  }
 };
 
 const ActiveInactiveCategoryStateController = async (req, res) => {
@@ -127,6 +139,51 @@ const ActiveInactiveNoticeStateController = async (req, res) => {
     console.log(error);
   }
 };
+
+const UpdateCategoryController = async (req, res) => {
+  try {
+    const { name, id_category } = req.body;
+    const response = await noticiesModel.UpdateCategory(
+      name, id_category
+    );
+    if (id_category) {
+      res.json(response);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+const DeleteCategoryController = async (req, res) => {
+  try {
+    const { id_category } = req.body;
+    const response = await noticiesModel.DeleteCategory(
+      id_category
+    );
+    if (id_category) {
+      res.json(response);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const DeleteNoticeController = async (req, res) => {
+  try {
+    const { id_notice } = req.body;
+    const response = await noticiesModel.DeleteNotice(
+      id_notice
+    );
+    if (id_notice) {
+      res.json(response);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
 export const noticiesController = {
   GetListCategoriesController,
   GetListNoticiesController,
@@ -138,4 +195,7 @@ export const noticiesController = {
   RegisterNoticeByCategoryController,
   ActiveInactiveCategoryStateController,
   ActiveInactiveNoticeStateController,
+  UpdateCategoryController,
+  DeleteCategoryController,
+  DeleteNoticeController
 };
