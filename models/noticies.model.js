@@ -156,20 +156,20 @@ const ActiveInactiveStateNoticie = async (
   }
 };
 
-const UpdateCategory = async (name, id_category) => {
+const ActiveInactiveStateGallery = async (state_image, id_notice) => {
   try {
-    const query = "UPDATE categories SET name=? WHERE id_category=?";
-    const data = await pool.query(query, [name, id_category]);
+    const query = "UPDATE gallery_images SET state_image=? WHERE id_notice = ?";
+    const data = await pool.query(query, [state_image, id_notice]);
     return data[0];
   } catch (error) {
     console.log("Error en la consulta a la BD: " + error);
   }
 };
 
-const ActiveInactiveStateGallery = async (state_image, id_notice) => {
+const UpdateCategory = async (name, id_category) => {
   try {
-    const query = "UPDATE gallery_images SET state_image=? WHERE id_notice = ?";
-    const data = await pool.query(query, [state_image, id_notice]);
+    const query = "UPDATE categories SET name=? WHERE id_category=?";
+    const data = await pool.query(query, [name, id_category]);
     return data[0];
   } catch (error) {
     console.log("Error en la consulta a la BD: " + error);
@@ -202,6 +202,16 @@ const UpdateNoticies = async (
   }
 };
 
+const UpdateGallery = async (name_image, id_notice, id_gallery) => {
+  try {
+    const query = "UPDATE gallery_images SET name_image=? WHERE id_notice=? && id_gallery=?";
+    const data = await pool.query(query, [name_image, id_notice, id_gallery]);
+    return data[0];
+  } catch (error) {
+    console.log("Error en la consulta a la BD: " + error);
+  }
+};
+
 const DeleteCategory = async (id_category) => {
   try {
     const query = "DELETE FROM categories WHERE id_category=?";
@@ -216,6 +226,16 @@ const DeleteNotice = async (id_notice) => {
   try {
     const query = "DELETE FROM noticies WHERE id_notice=?";
     const data = await pool.query(query, [id_notice]);
+    return data[0];
+  } catch (error) {
+    console.log("Error en la consulta a la BD: " + error);
+  }
+};
+
+const DeleteGallery = async (id_gallery) => {
+  try {
+    const query = "DELETE FROM gallery_images WHERE id_gallery=?";
+    const data = await pool.query(query, [id_gallery]);
     return data[0];
   } catch (error) {
     console.log("Error en la consulta a la BD: " + error);
@@ -239,6 +259,8 @@ export const noticiesModel = {
   ActiveInactiveStateGallery,
   UpdateCategory,
   UpdateNoticies,
+  UpdateGallery,
   DeleteCategory,
-  DeleteNotice
+  DeleteNotice,
+  DeleteGallery
 };

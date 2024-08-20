@@ -47,7 +47,9 @@ router.post("/state-noticie", noticiesController.ActiveInactiveNoticeStateContro
 router.post("/state-gallery", noticiesController.ActiveInactiveGalleryStateController);
 router.post("/update-category", noticiesController.UpdateCategoryController);
 router.post("/update-noticie", upload.fields([{ name: 'img_card' }, { name: 'img_banner' }]), noticiesController.UpdateNoticiesController);
+router.post("/update-gallery", upload.single('name_image'), noticiesController.UpdateGalleryController);
 router.post("/delete-category", noticiesController.DeleteCategoryController);
 router.post("/delete-noticie", noticiesController.DeleteNoticeController);
+router.post("/delete-gallery", noticiesController.DeleteGalleryController);
 
 export default router;
