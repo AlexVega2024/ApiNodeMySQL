@@ -1,245 +1,136 @@
 import { pool } from "../database/connection.js";
 
-const ListCategories = async () => {
+const handleQuery = async (query, params = []) => {
   try {
-    const query = "SELECT * FROM categories";
-    const data = await pool.query(query);
-    return data[0];
+    const [rows] = await pool.query(query, params);
+    return { ok: true, data: rows };
   } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
+    console.error("Error en la consulta a la BD:", error);
+    return { ok: false, message: "Error en la consulta" };
   }
+};
+
+const ListCategories = async () => {
+  const query = "SELECT * FROM categories";
+  return await handleQuery(query);
 };
 
 const ListCategoriesActive = async () => {
-  try {
-    const query = "SELECT * FROM categories WHERE state_categ=1";
-    const data = await pool.query(query);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  const query = "SELECT * FROM categories WHERE state_categ=1";
+  return await handleQuery(query);
 };
 
 const ListNoticies = async () => {
-  try {
-    const query =
-      `SELECT n.* FROM noticies n INNER JOIN categories c on n.id_category=c.id_category`;
-    const data = await pool.query(query);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  const query = "SELECT n.* FROM noticies n INNER JOIN categories c ON n.id_category=c.id_category";
+  return await handleQuery(query);
 };
 
 const ListGallery = async () => {
-  try {
-    const query = `SELECT id_gallery, name_image, state_image, id_notice FROM gallery_images`;
-    const data = await pool.query(query);
-    return data[0];
-  } catch (error) {}
+  const query = "SELECT id_gallery, name_image, state_image, id_notice FROM gallery_images";
+  return await handleQuery(query);
 };
 
 const ListNoticiesByCategoryActive = async (id_category) => {
-  try {
-    const query =
-      "SELECT * FROM noticies n INNER JOIN categories c on n.id_category=c.id_category where c.id_category=? && c.state_categ=1 && n.state_notice=1";
-    const data = await pool.query(query, [id_category]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  const query = `SELECT * FROM noticies n 
+                  INNER JOIN categories c ON n.id_category=c.id_category 
+                  WHERE c.id_category=? AND c.state_categ=1 AND n.state_notice=1`;
+  return await handleQuery(query, [id_category]);
 };
 
 const ListFirstThreeNoticies = async (id_category, id_noticie) => {
-  try {
-    const query = `SELECT n.* FROM noticies n
+  const query = `SELECT n.* FROM noticies n
                   INNER JOIN categories c ON n.id_category = c.id_category
-                  WHERE c.id_category = ? && n.id_notice <> ?
+                  WHERE c.id_category = ? AND n.id_notice <> ?
                   ORDER BY n.date_time DESC
                   LIMIT 3;`;
-    const data = await pool.query(query, [id_category, id_noticie]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  return await handleQuery(query, [id_category, id_noticie]);
 };
 
 const GetNoticieByCategory = async (id_category, id_noticie) => {
-  try {
-    const query = `SELECT *, c.name FROM noticies n INNER JOIN categories c on n.id_category=c.id_category 
-                  WHERE c.id_category=? && N.id_notice=?`;
-    const data = await pool.query(query, [id_category, id_noticie]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  const query = `SELECT *, c.name FROM noticies n 
+                  INNER JOIN categories c ON n.id_category=c.id_category 
+                  WHERE c.id_category=? AND n.id_notice=?`;
+  return await handleQuery(query, [id_category, id_noticie]);
 };
 
 const GetGalleryNotice = async (id_notice) => {
-  try {
-    const query = `SELECT id_gallery, name_image, state_image, id_notice FROM gallery_images WHERE id_notice=?`;
-    const data = await pool.query(query, [id_notice]);
-    return data[0];
-  } catch (error) {}
+  const query = `SELECT * FROM gallery_images 
+                  WHERE id_notice=?`;
+  return await handleQuery(query, [id_notice]);
 };
 
 const RegisterCategory = async (name) => {
-  try {
-    const query = `INSERT INTO categories (name, state_categ) 
-                    VALUES (?, 1)`;
-    const data = await pool.query(query, [name]);
-    return data[0];
-  } catch (error) {}
+  const query = "INSERT INTO categories (name, state_categ) VALUES (?, 1)";
+  return await handleQuery(query, [name]);
 };
 
-const RegisterNoticeByCategory = async (
-  id_category,
-  img_banner,
-  img_card,
-  title,
-  state_notice,
-  description
-) => {
-  try {
-    const query = `INSERT INTO noticies (id_category,img_banner,img_card, title, state_notice, description) 
+const RegisterNoticeByCategory = async (id_category, img_banner, img_card, title, state_notice, description) => {
+  const query = `INSERT INTO noticies (id_category, img_banner, img_card, title, state_notice, description) 
                   VALUES (?, ?, ?, ?, ?, ?)`;
-    const data = await pool.query(query, [
-      id_category,
-      img_banner,
-      img_card,
-      title,
-      state_notice,
-      description,
-    ]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en el modelo: ", error);
-  }
+  return await handleQuery(query, [id_category, img_banner, img_card, title, state_notice, description]);
 };
 
 const RegisterGallery = async (id_notice, name_image) => {
-  try {
-    const query = `INSERT INTO gallery_images (id_notice, name_image, state_image) 
-                    VALUES (?, ?, 1)`;
-    const data = await pool.query(query, [id_notice, name_image]);
-    return data[0];
-  } catch (error) {}
+  const query = `INSERT INTO gallery_images (id_notice, name_image, state_image) 
+                  VALUES (?, ?, 1)`;
+  return await handleQuery(query, [id_notice, name_image]);
 };
 
 const ActiveInactiveStateCategory = async (state_categ, id_category) => {
-  try {
-    const query = "UPDATE categories SET state_categ=? WHERE id_category = ?";
-    const data = await pool.query(query, [state_categ, id_category]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  const query = `UPDATE categories SET state_categ=? 
+                  WHERE id_category=?`;
+  return await handleQuery(query, [state_categ, id_category]);
 };
 
-const ActiveInactiveStateNoticie = async (
-  state_notice,
-  id_category,
-  id_notice
-) => {
-  try {
-    const query =
-      `UPDATE categories c INNER JOIN noticies n on c.id_category = n.id_category 
-      SET n.state_notice=? WHERE c.id_category = ? && n.id_notice = ?`;
-    const data = await pool.query(query, [
-      state_notice,
-      id_category,
-      id_notice,
-    ]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+const ActiveInactiveStateNoticie = async (state_notice, id_category, id_notice) => {
+  const query = `UPDATE noticies n 
+                  INNER JOIN categories c ON c.id_category = n.id_category 
+                  SET n.state_notice=? WHERE c.id_category = ? AND n.id_notice = ?`;
+  return await handleQuery(query, [state_notice, id_category, id_notice]);
 };
 
-const ActiveInactiveStateGallery = async (state_image, id_notice) => {
-  try {
-    const query = "UPDATE gallery_images SET state_image=? WHERE id_notice = ?";
-    const data = await pool.query(query, [state_image, id_notice]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+const ActiveInactiveStateGallery = async (state_image, id_notice, id_gallery) => {
+  const query = `UPDATE gallery_images SET state_image=? 
+                  WHERE id_notice=? && id_gallery=?`;
+  return await handleQuery(query, [state_image, id_notice, id_gallery]);
 };
 
 const UpdateCategory = async (name, id_category) => {
-  try {
-    const query = "UPDATE categories SET name=? WHERE id_category=?";
-    const data = await pool.query(query, [name, id_category]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  const query = `UPDATE categories SET name=? 
+                  WHERE id_category=?`;
+  return await handleQuery(query, [name, id_category]);
 };
 
-const UpdateNoticies = async (
-  img_banner,
-  img_card,
-  title,
-  description,
-  id_category,
-  id_notice
-) => {
-  try {
-    const query = `UPDATE noticies n INNER JOIN categories c ON n.id_category = c.id_category 
-                  SET n.img_banner = ?, n.img_card = ?, n.title = ?, n.description = ?,  n.date_time=CURRENT_TIMESTAMP
-                  WHERE c.id_category = ? && n.id_notice = ?`;
-    const data = await pool.query(query, [
-      img_banner,
-      img_card,
-      title,
-      description,
-      id_category,
-      id_notice,
-    ]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+const UpdateNoticies = async (img_banner, img_card, title, description, id_category, id_notice) => {
+  const query = `UPDATE noticies n 
+                  INNER JOIN categories c ON n.id_category = c.id_category 
+                  SET n.img_banner = ?, n.img_card = ?, n.title = ?, n.description = ?, n.date_time=CURRENT_TIMESTAMP
+                  WHERE c.id_category = ? AND n.id_notice = ?`;
+  return await handleQuery(query, [img_banner, img_card, title, description, id_category, id_notice]);
 };
 
-const UpdateGallery = async (name_image, id_notice, id_gallery) => {
-  try {
-    const query = "UPDATE gallery_images SET name_image=? WHERE id_notice=? && id_gallery=?";
-    const data = await pool.query(query, [name_image, id_notice, id_gallery]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+const UpdateGallery = async (id_notice, name_image, id_gallery) => {
+  const query = `UPDATE gallery_images SET id_notice=? ,name_image=?
+                  WHERE id_gallery=?`;
+  return await handleQuery(query, [id_notice, name_image, id_gallery]);
 };
 
 const DeleteCategory = async (id_category) => {
-  try {
-    const query = "DELETE FROM categories WHERE id_category=?";
-    const data = await pool.query(query, [id_category]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  const query = `DELETE FROM categories 
+                  WHERE id_category=?`;
+  return await handleQuery(query, [id_category]);
 };
 
 const DeleteNotice = async (id_notice) => {
-  try {
-    const query = "DELETE FROM noticies WHERE id_notice=?";
-    const data = await pool.query(query, [id_notice]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  const query = `DELETE FROM noticies 
+                  WHERE id_notice=?`;
+  return await handleQuery(query, [id_notice]);
 };
 
 const DeleteGallery = async (id_gallery) => {
-  try {
-    const query = "DELETE FROM gallery_images WHERE id_gallery=?";
-    const data = await pool.query(query, [id_gallery]);
-    return data[0];
-  } catch (error) {
-    console.log("Error en la consulta a la BD: " + error);
-  }
+  const query = `DELETE FROM gallery_images 
+                  WHERE id_gallery=?`;
+  return await handleQuery(query, [id_gallery]);
 };
 
 export const noticiesModel = {
