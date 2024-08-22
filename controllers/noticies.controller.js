@@ -9,11 +9,6 @@ const GetListCategoriesController = async (req, res) => {
         data: response.data,
         message: "Lista de categorías obtenida correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No se encontraron categorías.",
-      });
     }
   } catch (error) {
     return res.status(500).json({
@@ -33,11 +28,6 @@ const GetListCategoriesActiveController = async (req, res) => {
         data: response.data,
         message: "Lista de categorías activas obtenida correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No se encontraron categorías activas.",
-      });
     }
   } catch (error) {
     return res.status(500).json({
@@ -56,11 +46,6 @@ const GetListNoticiesController = async (req, res) => {
         success: true,
         data: response.data,
         message: "Lista de noticias obtenida correctamente.",
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No se encontraron noticias.",
       });
     }
   } catch (error) {
@@ -88,11 +73,6 @@ const GetListNoticiesByCategoryActiveController = async (req, res) => {
         data: response.data,
         message: "Lista de noticias activas por categoría obtenida correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No se encontraron noticias activas para esta categoría.",
-      });
     }
   } catch (error) {
     return res.status(500).json({
@@ -118,11 +98,6 @@ const GetListFirstThreeNoticiesController = async (req, res) => {
         success: true,
         data: response.data,
         message: "Primeras tres noticias obtenidas correctamente.",
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No se encontraron noticias.",
       });
     }
   } catch (error) {
@@ -150,11 +125,6 @@ const GetNoticieByCategoryController = async (req, res) => {
         data: response.data,
         message: "Noticia por categoría obtenida correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No se encontró la noticia.",
-      });
     }
   } catch (error) {
     return res.status(500).json({
@@ -173,11 +143,6 @@ const GetListGalleryController = async (req, res) => {
         success: true,
         data: response.data,
         message: "Lista de galería obtenida correctamente.",
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No se encontraron imágenes en la galería.",
       });
     }
   } catch (error) {
@@ -205,11 +170,6 @@ const GetGalleryByNoticeController = async (req, res) => {
         data: response.data,
         message: "Galería de la noticia obtenida correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "No se encontraron imágenes para esta noticia.",
-      });
     }
   } catch (error) {
     return res.status(500).json({
@@ -236,12 +196,6 @@ const RegisterCategoryController = async (req, res) => {
         data: response,
         message: "Categoría registrada correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Hubo un error al registrar la categoría.",
-        messageModel: response.message
-      });
     }
   } catch (error) {
     return res.status(500).json({
@@ -254,6 +208,8 @@ const RegisterCategoryController = async (req, res) => {
 
 const RegisterNoticeByCategoryController = async (req, res) => {
   try {
+    const img_banner_path = req.files["img_banner"][0].filename;
+    const img_card_path = req.files["img_card"][0].filename;
     const {
       id_category,
       title,
@@ -261,19 +217,12 @@ const RegisterNoticeByCategoryController = async (req, res) => {
       description,
     } = req.body;
     
-    if (!id_category || !title || !state_notice || !description) {
+    if (!id_category || !title || !state_notice || !description || !img_banner_path || !img_card_path) {
       return res.status(400).json({
         success: false,
         message: "ID de categoría, título, estado de noticia y descripción son requeridos.",
       });
     }
-
-    const img_banner_path = req.files["img_banner"]
-      ? req.files["img_banner"][0].filename
-      : "";
-    const img_card_path = req.files["img_card"]
-      ? req.files["img_card"][0].filename
-      : "";
 
     const response = await noticiesModel.RegisterNoticeByCategory(
       id_category,
@@ -289,12 +238,6 @@ const RegisterNoticeByCategoryController = async (req, res) => {
         data: response,
         message: "Noticia registrada correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Hubo un error al registrar la noticia.",
-        messageModel: response.message
-      });
     }
   } catch (error) {
     return res.status(500).json({
@@ -307,15 +250,14 @@ const RegisterNoticeByCategoryController = async (req, res) => {
 
 const RegisterGalleryController = async (req, res) => {
   try {
+    const img_gallery_path = req.file.filename;
     const { id_notice } = req.body;
-    if (!id_notice) {
+    if (!id_notice && !img_gallery_path) {
       return res.status(400).json({
         success: false,
-        message: "ID de noticia es requerido.",
+        message: "ID de noticia e imagen es requerido.",
       });
     }
-
-    const img_gallery_path = req.file ? req.file.filename : "";
 
     const response = await noticiesModel.RegisterGallery(id_notice, img_gallery_path);
     if (response.ok) {
@@ -323,12 +265,6 @@ const RegisterGalleryController = async (req, res) => {
         success: true,
         data: response,
         message: "Imagen de la galería registrada correctamente.",
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Hubo un error al registrar la imagen de la galería.",
-        messageModel: response.message
       });
     }
   } catch (error) {
@@ -453,12 +389,6 @@ const UpdateCategoryController = async (req, res) => {
         data: response,
         message: "Categoría actualizada correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Hubo un error al actualizar la categoría.",
-        messageModel: response.message
-      });
     }
   } catch (error) {
     return res.status(500).json({
@@ -481,10 +411,10 @@ const UpdateNoticiesController = async (req, res) => {
 
     const img_card_path = req.files["img_card"]
       ? req.files["img_card"][0].filename
-      : "";
+      : req.body["img_card"];
     const img_banner_path = req.files["img_banner"]
       ? req.files["img_banner"][0].filename
-      : "";
+      : req.body["img_banner"];
 
     const response = await noticiesModel.UpdateNoticies(
       img_banner_path,
@@ -501,13 +431,7 @@ const UpdateNoticiesController = async (req, res) => {
         data: response,
         message: "Noticia actualizada correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Hubo un error al actualizar la noticia.",
-        messageModel: response.message
-      });
-    }
+    } 
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -519,14 +443,14 @@ const UpdateNoticiesController = async (req, res) => {
 
 const UpdateGalleryController = async (req, res) => {
   try {
-    const { id_notice, id_gallery } = req.body;
+    const { name_image, id_notice, id_gallery } = req.body;
     if (!id_notice || !id_gallery) {
       return res.status(400).json({
         success: false,
         message: "ID de noticia e ID de galería son requeridos.",
       });
     }
-    const img_gallery_path = req.file ? req.file.filename : "";
+    const img_gallery_path = req.file ? req.file.filename : name_image;
 
     const response = await noticiesModel.UpdateGallery(id_notice, img_gallery_path, id_gallery);
     
@@ -535,12 +459,6 @@ const UpdateGalleryController = async (req, res) => {
         success: true,
         data: response,
         message: "Imagen de la galería actualizada correctamente.",
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Hubo un error al actualizar la imagen de la galeria.",
-        messageModel: response.message
       });
     }
   } catch (error) {
@@ -567,12 +485,6 @@ const DeleteCategoryController = async (req, res) => {
         success: true,
         data: response,
         message: "Categoría eliminada correctamente.",
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Hubo un error al eliminar la categoría.",
-        messageModel: response.message
       });
     }
   } catch (error) {
@@ -601,12 +513,6 @@ const DeleteNoticeController = async (req, res) => {
         data: response,
         message: "Noticia eliminada correctamente.",
       });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Hubo un error al eliminar la noticia.",
-        messageModel: response.message
-      });
     }
   } catch (error) {
     return res.status(500).json({
@@ -632,12 +538,6 @@ const DeleteGalleryController = async (req, res) => {
         success: true,
         data: response,
         message: "Imagen de la galería eliminada correctamente.",
-      });
-    } else {
-      return res.status(404).json({
-        success: false,
-        message: "Hubo un error al eliminar la imagen de la galería.",
-        messageModel: response.message
       });
     }
   } catch (error) {
