@@ -127,14 +127,14 @@ router.post("/state-category",
   noticiesController.ActiveInactiveCategoryStateController);
 
 router.post("/state-noticie",
-  body('state_categ').notEmpty().withMessage('state_categ es requerido').trim().escape(),
+  body('state_notice').notEmpty().withMessage('state_notice es requerido').trim().escape(),
   body('id_category').notEmpty().withMessage('id_category es requerido').trim().escape(),
   body('id_notice').notEmpty().withMessage('id_notice es requerido').trim().escape(),
   extractErrorMessages,
   noticiesController.ActiveInactiveNoticeStateController);
 
 router.post("/state-gallery", 
-  body('state_categ').notEmpty().withMessage('state_categ es requerido').trim().escape(),
+  body('state_image').notEmpty().withMessage('state_image es requerido').trim().escape(),
   body('id_gallery').notEmpty().withMessage('id_gallery es requerido').trim().escape(),
   body('id_notice').notEmpty().withMessage('id_notice es requerido').trim().escape(),
   extractErrorMessages,
