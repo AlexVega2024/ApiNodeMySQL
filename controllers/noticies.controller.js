@@ -212,7 +212,6 @@ const RegisterNoticeByCategoryController = async (req, res) => {
     const {
       id_category,
       title,
-      state_notice,
       description,
     } = req.body;
 
@@ -221,7 +220,6 @@ const RegisterNoticeByCategoryController = async (req, res) => {
       img_banner_path,
       img_card_path,
       title,
-      state_notice,
       description
     );
     if (response.ok) {
@@ -371,14 +369,6 @@ const UpdateCategoryController = async (req, res) => {
 const UpdateNoticiesController = async (req, res) => {
   try {
 
-    if (!req.files["img_banner"] || !req.files["img_card"]) {
-      return res.status(400).json(
-        {
-          message: ["No existen imágenes cargadas"]
-        }
-      );
-    }
-
     const { title, description, id_category, id_notice } = req.body;
     const img_card_path = req.files["img_card"]
       ? req.files["img_card"][0].filename
@@ -413,27 +403,17 @@ const UpdateNoticiesController = async (req, res) => {
 };
 
 const UpdateGalleryController = async (req, res) => {
-  console.log(req);
   try {
-    if (!req.file) {
-      return res.status(400).json(
-        {
-          message: ["No existe imágenes cargadas"]
-        }
-      );
-    }
-
     const { name_image, id_notice, id_gallery } = req.body;
     const img_gallery_path = req.file ? req.file.filename : name_image;
     const response = await noticiesModel.UpdateGallery(id_notice, img_gallery_path, id_gallery);
-    
     if (response.ok) {
       return res.status(200).json({
         success: true,
         data: response,
         message: "Imagen de la galería actualizada correctamente.",
       });
-    }
+    } 
   } catch (error) {
     return res.status(500).json({
       success: false,

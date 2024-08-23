@@ -70,10 +70,10 @@ const RegisterCategory = async (name) => {
   return await handleQuery(query, [name]);
 };
 
-const RegisterNoticeByCategory = async (id_category, img_banner, img_card, title, state_notice, description) => {
+const RegisterNoticeByCategory = async (id_category, img_banner, img_card, title, description) => {
   const query = `INSERT INTO noticies (id_category, img_banner, img_card, title, state_notice, description) 
-                  VALUES (?, ?, ?, ?, ?, ?)`;
-  return await handleQuery(query, [id_category, img_banner, img_card, title, state_notice, description]);
+                  VALUES (?, ?, ?, ?, 1, ?)`;
+  return await handleQuery(query, [id_category, img_banner, img_card, title, description]);
 };
 
 const RegisterGallery = async (id_notice, name_image) => {
