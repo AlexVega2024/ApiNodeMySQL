@@ -25,6 +25,12 @@ const ListNoticies = async () => {
   return await handleQuery(query);
 };
 
+const ListNoticieActive = async (id_noticie, id_category) => {
+  const query = `SELECT n.* FROM noticies n INNER JOIN categories c ON n.id_category=c.id_category
+                  WHERE n.id_notice=? && n.state_notice=1 && c.id_category=?`;
+  return await handleQuery(query, [id_noticie, id_category]);
+};
+
 const ListGallery = async () => {
   const query = "SELECT id_gallery, name_image, state_image, id_notice FROM gallery_images";
   return await handleQuery(query);
@@ -40,7 +46,7 @@ const ListNoticiesByCategoryActive = async (id_category) => {
 const ListFirstThreeNoticies = async (id_category, id_noticie) => {
   const query = `SELECT n.* FROM noticies n
                   INNER JOIN categories c ON n.id_category = c.id_category
-                  WHERE c.id_category = ? AND n.id_notice <> ?
+                  WHERE c.id_category = ? AND n.id_notice <> ? AND n.state_notice=1
                   ORDER BY n.date_time DESC
                   LIMIT 3;`;
   return await handleQuery(query, [id_category, id_noticie]);
@@ -137,6 +143,7 @@ export const noticiesModel = {
   ListCategories,
   ListCategoriesActive,
   ListNoticies,
+  ListNoticieActive,
   ListNoticiesByCategoryActive,
   ListFirstThreeNoticies,
   GetNoticieByCategory,

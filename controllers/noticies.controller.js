@@ -57,15 +57,49 @@ const GetListNoticiesController = async (req, res) => {
   }
 };
 
+const GetListGalleryController = async (req, res) => {
+  try {
+    const response = await noticiesModel.ListGallery();
+    if (response.ok) {
+      return res.status(200).json({
+        success: true,
+        data: response.data,
+        message: "Lista de galería obtenida correctamente.",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error en la base de datos.",
+      error: error.message,
+    });
+  }
+};
+
+const GetNoticieActiveController = async (req, res) => {
+  try {
+    const { id_noticie, id_category } = req.body;
+
+    const response = await noticiesModel.ListNoticieActive(id_noticie, id_category);
+    if (response.ok) {
+      return res.status(200).json({
+        success: true,
+        data: response.data,
+        message: "Noticia obtenida correctamente",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error en la base de datos.",
+      error: error.message,
+    });
+  }
+};
+
 const GetListNoticiesByCategoryActiveController = async (req, res) => {
   try {
     const { id_category } = req.body;
-    if (!id_category) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de categoría es requerido.",
-      });
-    }
     const response = await noticiesModel.ListNoticiesByCategoryActive(id_category);
     if (response.data) {
       return res.status(200).json({
@@ -86,12 +120,6 @@ const GetListNoticiesByCategoryActiveController = async (req, res) => {
 const GetListFirstThreeNoticiesController = async (req, res) => {
   try {
     const { id_category, id_noticie } = req.body;
-    if (!id_category || !id_noticie) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de categoría e ID de noticia son requeridos.",
-      });
-    }
     const response = await noticiesModel.ListFirstThreeNoticies(id_category, id_noticie);
     if (response.ok) {
       return res.status(200).json({
@@ -112,12 +140,6 @@ const GetListFirstThreeNoticiesController = async (req, res) => {
 const GetNoticieByCategoryController = async (req, res) => {
   try {
     const { id_category, id_noticie } = req.body;
-    if (!id_category || !id_noticie) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de categoría e ID de noticia son requeridos.",
-      });
-    }
     const response = await noticiesModel.GetNoticieByCategory(id_category, id_noticie);
     if (response.ok) {
       return res.status(200).json({
@@ -135,34 +157,9 @@ const GetNoticieByCategoryController = async (req, res) => {
   }
 };
 
-const GetListGalleryController = async (req, res) => {
-  try {
-    const response = await noticiesModel.ListGallery();
-    if (response.ok) {
-      return res.status(200).json({
-        success: true,
-        data: response.data,
-        message: "Lista de galería obtenida correctamente.",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error en la base de datos.",
-      error: error.message,
-    });
-  }
-};
-
 const GetGalleryByNoticeController = async (req, res) => {
   try {
     const { id_notice } = req.body;
-    if (!id_notice) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de noticia es requerido.",
-      });
-    }
     const response = await noticiesModel.GetGalleryNotice(id_notice);
     if (response.ok) {
       return res.status(200).json({
@@ -183,12 +180,6 @@ const GetGalleryByNoticeController = async (req, res) => {
 const RegisterCategoryController = async (req, res) => {
   try {
     const { name } = req.body;
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        message: "Nombre de la categoría es requerido.",
-      });
-    }
     const response = await noticiesModel.RegisterCategory(name);
     if (response.ok) {
       return res.status(201).json({
@@ -208,6 +199,14 @@ const RegisterCategoryController = async (req, res) => {
 
 const RegisterNoticeByCategoryController = async (req, res) => {
   try {
+    if (!req.files["img_banner"] || !req.files["img_card"]) {
+      return res.status(400).json(
+        {
+          message: ["No existe una imagen cargada"]
+        }
+      );
+    }
+
     const img_banner_path = req.files["img_banner"][0].filename;
     const img_card_path = req.files["img_card"][0].filename;
     const {
@@ -216,13 +215,6 @@ const RegisterNoticeByCategoryController = async (req, res) => {
       state_notice,
       description,
     } = req.body;
-    
-    if (!id_category || !title || !state_notice || !description || !img_banner_path || !img_card_path) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de categoría, título, estado de noticia y descripción son requeridos.",
-      });
-    }
 
     const response = await noticiesModel.RegisterNoticeByCategory(
       id_category,
@@ -250,14 +242,15 @@ const RegisterNoticeByCategoryController = async (req, res) => {
 
 const RegisterGalleryController = async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json(
+        {
+          message: ["No existe una imagen cargada"]
+        }
+      );
+    }
     const img_gallery_path = req.file.filename;
     const { id_notice } = req.body;
-    if (!id_notice && !img_gallery_path) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de noticia e imagen es requerido.",
-      });
-    }
 
     const response = await noticiesModel.RegisterGallery(id_notice, img_gallery_path);
     if (response.ok) {
@@ -279,12 +272,6 @@ const RegisterGalleryController = async (req, res) => {
 const ActiveInactiveCategoryStateController = async (req, res) => {
   try {
     const { state_categ, id_category } = req.body;
-    if (!id_category) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de categoría son requeridos.",
-      });
-    }
     const response = await noticiesModel.ActiveInactiveStateCategory(state_categ, id_category);
 
     if (response.ok) {
@@ -312,12 +299,6 @@ const ActiveInactiveCategoryStateController = async (req, res) => {
 const ActiveInactiveNoticeStateController = async (req, res) => {
   try {
     const { state_notice, id_category, id_notice } = req.body;
-    if (!id_category || !id_notice) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de categoría e ID de noticia son requeridos.",
-      });
-    }
     const response = await noticiesModel.ActiveInactiveStateNoticie(state_notice, id_category, id_notice);
     if (response.ok) {
       return res.status(200).json({
@@ -344,12 +325,6 @@ const ActiveInactiveNoticeStateController = async (req, res) => {
 const ActiveInactiveGalleryStateController = async (req, res) => {
   try {
     const { state_image, id_notice, id_gallery } = req.body;
-    if (!id_notice || !id_gallery) {
-      return res.status(400).json({
-        success: false,
-        message: "Estado de imagen (booleano) e ID de noticia son requeridos.",
-      });
-    }
     const response = await noticiesModel.ActiveInactiveStateGallery(state_image, id_notice, id_gallery);
     if (response.ok) {
       return res.status(200).json({
@@ -376,12 +351,6 @@ const ActiveInactiveGalleryStateController = async (req, res) => {
 const UpdateCategoryController = async (req, res) => {
   try {
     const { name, id_category } = req.body;
-    if (!name || !id_category) {
-      return res.status(400).json({
-        success: false,
-        message: "Nombre de la categoría e ID de categoría son requeridos.",
-      });
-    }
     const response = await noticiesModel.UpdateCategory(name, id_category);
     if (response.ok) {
       return res.status(200).json({
@@ -401,14 +370,16 @@ const UpdateCategoryController = async (req, res) => {
 
 const UpdateNoticiesController = async (req, res) => {
   try {
-    const { title, description, id_category, id_notice } = req.body;
-    if (!title || !description || !id_category || !id_notice) {
-      return res.status(400).json({
-        success: false,
-        message: "Título, descripción, ID de categoría e ID de noticia son requeridos.",
-      });
+
+    if (!req.files["img_banner"] || !req.files["img_card"]) {
+      return res.status(400).json(
+        {
+          message: ["No existen imágenes cargadas"]
+        }
+      );
     }
 
+    const { title, description, id_category, id_notice } = req.body;
     const img_card_path = req.files["img_card"]
       ? req.files["img_card"][0].filename
       : req.body["img_card"];
@@ -442,16 +413,18 @@ const UpdateNoticiesController = async (req, res) => {
 };
 
 const UpdateGalleryController = async (req, res) => {
+  console.log(req);
   try {
-    const { name_image, id_notice, id_gallery } = req.body;
-    if (!id_notice || !id_gallery) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de noticia e ID de galería son requeridos.",
-      });
+    if (!req.file) {
+      return res.status(400).json(
+        {
+          message: ["No existe imágenes cargadas"]
+        }
+      );
     }
-    const img_gallery_path = req.file ? req.file.filename : name_image;
 
+    const { name_image, id_notice, id_gallery } = req.body;
+    const img_gallery_path = req.file ? req.file.filename : name_image;
     const response = await noticiesModel.UpdateGallery(id_notice, img_gallery_path, id_gallery);
     
     if (response.ok) {
@@ -473,12 +446,6 @@ const UpdateGalleryController = async (req, res) => {
 const DeleteCategoryController = async (req, res) => {
   try {
     const { id_category } = req.body;
-    if (!id_category) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de categoría es requerido.",
-      });
-    }
     const response = await noticiesModel.DeleteCategory(id_category);
     if (response.ok) {
       return res.status(200).json({
@@ -499,12 +466,6 @@ const DeleteCategoryController = async (req, res) => {
 const DeleteNoticeController = async (req, res) => {
   try {
     const { id_notice } = req.body;
-    if (!id_notice) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de noticia es requerido.",
-      });
-    }
     const response = await noticiesModel.DeleteNotice(id_notice);
     
     if (response.ok) {
@@ -526,12 +487,6 @@ const DeleteNoticeController = async (req, res) => {
 const DeleteGalleryController = async (req, res) => {
   try {
     const { id_gallery } = req.body;
-    if (!id_gallery) {
-      return res.status(400).json({
-        success: false,
-        message: "ID de galería es requerido.",
-      });
-    }
     const response = await noticiesModel.DeleteGallery(id_gallery);
     if (response.ok) {
       return res.status(200).json({
@@ -553,6 +508,7 @@ export const noticiesController = {
   GetListCategoriesController,
   GetListCategoriesActiveController,
   GetListNoticiesController,
+  GetNoticieActiveController,
   GetListNoticiesByCategoryActiveController,
   GetListFirstThreeNoticiesController,
   GetNoticieByCategoryController,
